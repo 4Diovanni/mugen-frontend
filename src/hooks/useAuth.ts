@@ -27,6 +27,7 @@ export function useAuth() {
 
   /**
    * Login
+   * ✅ Login bem-sucedido → Dashboard
    */
   const login = useCallback(
     async (email: string, password: string) => {
@@ -37,13 +38,18 @@ export function useAuth() {
         const response = await authApi.login({ email, password })
         const { user: userData, token: newToken } = response.data
 
+        // Armazenar token e dados do usuário
         setUser(userData as any)
         setToken(newToken)
         setIsAuthenticated(true)
         localStorage.setItem('token', newToken)
+        localStorage.setItem('user', JSON.stringify(userData))
+        localStorage.setItem('userId', userData.id)
 
         toast.success('Bem-vindo de volta!')
-        navigate('/dashboard')
+        
+        // ✅ Redirecionar para dashboard após login
+        navigate('/dashboard', { replace: true })
       } catch (err: any) {
         const errorMsg = err.response?.data?.message || 'Erro ao fazer login'
         setError(errorMsg)
@@ -57,6 +63,7 @@ export function useAuth() {
 
   /**
    * Register
+   * ✅ Registro bem-sucedido → Login (não dashboard!)
    */
   const register = useCallback(
     async (
@@ -75,15 +82,27 @@ export function useAuth() {
           name,
           confirmPassword,
         })
-        const { user: userData, token: newToken } = response.data
-
-        setUser(userData as any)
-        setToken(newToken)
-        setIsAuthenticated(true)
-        localStorage.setItem('token', newToken)
-
-        toast.success('Conta criada com sucesso!')
-        navigate('/dashboard')
+        
+        // Opção 1: Backend retorna token (auto-login)
+        if (response.data?.token) {
+          const { user: userData, token: newToken } = response.data
+          setUser(userData as any)
+          setToken(newToken)
+          setIsAuthenticated(true)
+          localStorage.setItem('token', newToken)
+          localStorage.setItem('user', JSON.stringify(userData))
+          localStorage.setItem('userId', userData.id)
+          
+          toast.success('Conta criada com sucesso!')
+          // Auto-login bem-sucedido
+          navigate('/dashboard', { replace: true })
+        } 
+        // Opção 2: Backend não retorna token (redireciona para login)
+        else {
+          toast.success('Conta criada com sucesso! Faça login agora.')
+          // ✅ Redirecionar para login após registro
+          navigate('/login', { replace: true, state: { email } })
+        }
       } catch (err: any) {
         const errorMsg = err.response?.data?.message || 'Erro ao criar conta'
         setError(errorMsg)
@@ -103,10 +122,16 @@ export function useAuth() {
       setIsLoading(true)
       await authApi.logout()
       logoutStore()
+      localStorage.removeItem('token')
+      localStorage.removeItem('user')
+      localStorage.removeItem('userId')
       toast.success('Desconectado com sucesso')
-      navigate('/login')
+      navigate('/login', { replace: true })
     } catch (err: any) {
       toast.error('Erro ao desconectar')
+      // Desconectar mesmo se der erro
+      logoutStore()
+      navigate('/login', { replace: true })
     } finally {
       setIsLoading(false)
     }
