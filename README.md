@@ -1,73 +1,113 @@
-# React + TypeScript + Vite
+# 🎮 Mugen Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Frontend moderno em **React 18 + TypeScript + Tailwind CSS** para o RPG Game Mugen.
 
-Currently, two official plugins are available:
+## 🚀 Stack Tecnológico
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **Framework**: React 18 com TypeScript
+- **Build Tool**: Vite
+- **Styling**: Tailwind CSS
+- **State Management**: Zustand
+- **Authentication**: Supabase Auth + JWT
+- **HTTP Client**: Axios
+- **Database**: Supabase (PostgreSQL)
+- **Deploy**: Vercel
 
-## React Compiler
+## 📦 Instalação
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+```bash
+# Instalar dependências
+npm install
 
-## Expanding the ESLint configuration
+# Criar arquivo .env local
+cp .env.example .env
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+# Preencher variáveis de ambiente
+# VITE_SUPABASE_URL
+# VITE_SUPABASE_ANON_KEY
+# VITE_API_BASE_URL
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## 🏃 Desenvolvimento
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+```bash
+# Rodar servidor de desenvolvimento
+npm run dev
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+# Build para produção
+npm run build
+
+# Preview do build
+npm run preview
+
+# Type checking
+npm run type-check
 ```
+
+## 📁 Estrutura de Pastas
+
+```
+src/
+├── @types/          # Tipos TypeScript globais
+├── api/             # Chamadas HTTP & Supabase
+├── components/      # Componentes React reutilizáveis
+├── pages/           # Páginas da aplicação
+├── services/        # Lógica de negócio
+├── stores/          # Estado global (Zustand)
+├── hooks/           # Custom React hooks
+├── utils/           # Funções utilitárias
+├── styles/          # Estilos globais
+├── middleware/      # Middlewares (ProtectedRoute, etc)
+├── App.tsx          # Router e setup principal
+└── main.tsx         # Entry point
+```
+
+## 🔐 Autenticação
+
+- **Login/Register**: Via Supabase Auth
+- **Tokens**: JWT armazenados no localStorage
+- **Protected Routes**: Guarded via ProtectedRoute middleware
+- **Roles**: ROLE_PLAYER e ROLE_MASTER
+
+## 🎯 Features Principais
+
+- ✅ Autenticação com Supabase
+- ✅ Gerenciamento de Personagens
+- ✅ Sistema de Inventário
+- ✅ Achievements & Badges
+- ✅ Minigames
+- ✅ Admin Panel (Master only)
+- ✅ Tema Dark Mode
+- ✅ Responsivo (Mobile-first)
+
+## 📝 Variáveis de Ambiente
+
+```env
+# Supabase
+VITE_SUPABASE_URL=https://seu-projeto.supabase.co
+VITE_SUPABASE_ANON_KEY=sua-chave-anonima
+
+# API
+VITE_API_BASE_URL=http://localhost:8080
+VITE_API_TIMEOUT=10000
+
+# App
+VITE_APP_NAME=Mugen
+VITE_ENVIRONMENT=development
+```
+
+## 🤝 Contribuindo
+
+1. Fork o repositório
+2. Crie uma branch para sua feature (`git checkout -b feature/AmazingFeature`)
+3. Commit suas mudanças (`git commit -m 'Add some AmazingFeature'`)
+4. Push para a branch (`git push origin feature/AmazingFeature`)
+5. Abra um Pull Request
+
+## 📄 Licença
+
+Este projeto está licenciado sob a Licença MIT.
+
+---
+
+**Desenvolvido com ❤️ por Diovanni**
