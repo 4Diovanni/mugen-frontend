@@ -3,7 +3,7 @@
  * Characters, Inventory, Achievements, etc
  */
 
-import type { UserRole } from './index'
+import type { UserRole } from './index.ts'
 
 export type ItemType = 'WEAPON' | 'ARMOR' | 'MATERIAL' | 'CONSUMABLE' | 'QUEST_ITEM'
 export type ItemRarity = 'COMMON' | 'UNCOMMON' | 'RARE' | 'EPIC' | 'LEGENDARY'
