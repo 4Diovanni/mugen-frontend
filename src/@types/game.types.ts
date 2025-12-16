@@ -1,36 +1,37 @@
 /**
  * Game Related Types
- * Characters, Inventory, Achievements, etc
+ * Sincronizado com backend: com.mugen.backend.entity
  */
-
-import type { UserRole } from './index'
 
 export type ItemType = 'WEAPON' | 'ARMOR' | 'MATERIAL' | 'CONSUMABLE' | 'QUEST_ITEM'
 export type ItemRarity = 'COMMON' | 'UNCOMMON' | 'RARE' | 'EPIC' | 'LEGENDARY'
 export type CharacterClass = 'WARRIOR' | 'MAGE' | 'ARCHER' | 'ROGUE' | 'PALADIN'
+export type AttributeName = 'STR' | 'DEX' | 'CON' | 'WIL' | 'MND' | 'SPI'
 
-// Character
+// ==================== CHARACTER ====================
+
 export interface Character {
-  id: string
-  userId: string
+  id: string // UUID
+  owner: User
   name: string
   class: CharacterClass
   level: number
-  experience: number
-  health: number
-  maxHealth: number
-  mana: number
-  maxMana: number
-  strength: number
-  intelligence: number
-  dexterity: number
-  constitution: number
-  wisdom: number
-  charisma: number
-  gold: number
-  skillPoints: number
+  exp: number // current experience
+  attributes: CharacterAttribute
+  transformations: CharacterTransformation[]
+  skills: CharacterSkill[]
+  isActive: boolean
   createdAt: string
   updatedAt: string
+}
+
+export interface CharacterAttribute {
+  str: number // Strength
+  dex: number // Dexterity
+  con: number // Constitution
+  wil: number // Will
+  mnd: number // Mind
+  spi: number // Spirit
 }
 
 export interface CreateCharacterRequest {
@@ -38,46 +39,103 @@ export interface CreateCharacterRequest {
   class: CharacterClass
 }
 
-export interface UpdateCharacterRequest {
+export interface UpdateCharacterDTO {
   name?: string
   level?: number
-  experience?: number
-  health?: number
-  gold?: number
-  skillPoints?: number
+  exp?: number
+  isActive?: boolean
 }
 
-// Inventory
+export interface UpdateCharacterNameDTO {
+  name: string
+}
+
+// ==================== CHARACTER STATS ====================
+
+export interface CharacterStats {
+  health: number
+  maxHealth: number
+  mana: number
+  maxMana: number
+  attackPower: number
+  defensePower: number
+  magicPower: number
+  magicDefense: number
+  speed: number
+  evasion: number
+}
+
+export interface CharacterTransformation {
+  id: string // UUID
+  character: Character
+  transformation: Transformation
+  unlockedAt: string
+}
+
+export interface Transformation {
+  id: number
+  name: string
+  description: string
+  icon?: string
+  requiredLevel: number
+  bonusStats?: Record<string, number>
+}
+
+// ==================== SKILLS ====================
+
+export interface CharacterSkill {
+  id: string // UUID
+  character: Character
+  skill: Skill
+  level: number
+  lastUsedAt?: string
+}
+
+export interface Skill {
+  id: number
+  name: string
+  description: string
+  class: CharacterClass
+  cooldown: number // em segundos
+  manaCost: number
+  damage?: number
+  healing?: number
+  icon?: string
+}
+
+// ==================== INVENTORY ====================
+
 export interface InventoryItem {
-  id: string
-  characterId: string
-  itemId: string
+  id: string // UUID
+  character: Character
+  item: Item
   quantity: number
   slot?: number
   isEquipped: boolean
-  createdAt: string
+  equippedAt?: string
 }
 
 export interface Item {
-  id: string
+  id: number
   name: string
   description: string
   type: ItemType
   rarity: ItemRarity
   price: number
   icon?: string
-  attributes?: {
-    damage?: number
-    defense?: number
-    magicDefense?: number
-    healthBoost?: number
-    manaBoost?: number
-  }
+  requirements?: ItemRequirements
+}
+
+export interface ItemRequirements {
+  minLevel?: number
+  requiredClass?: CharacterClass
+  requiredStats?: Partial<CharacterAttribute>
 }
 
 export interface Weapon extends Item {
   damage: number
-  weaponType: 'SWORD' | 'AXE' | 'DAGGER' | 'BOW' | 'STAFF'
+  weaponType: 'SWORD' | 'AXE' | 'DAGGER' | 'BOW' | 'STAFF' | 'GUN'
+  attackSpeed: number
 }
 
 export interface Armor extends Item {
@@ -86,63 +144,96 @@ export interface Armor extends Item {
   armorType: 'HEAD' | 'CHEST' | 'LEGS' | 'FEET' | 'HANDS'
 }
 
-// Achievement
+// ==================== ACHIEVEMENTS ====================
+
 export interface Achievement {
-  id: string
+  id: number
   name: string
   description: string
   icon?: string
   points: number
-  unlockedAt?: string
   requirement?: string
+  createdAt: string
 }
 
 export interface CharacterAchievement {
-  id: string
-  characterId: string
-  achievementId: string
+  id: string // UUID
+  character: Character
+  achievement: Achievement
   unlockedAt: string
 }
 
-// Minigame
-export interface Minigame {
-  id: string
-  name: string
-  description: string
-  type: 'PUZZLE' | 'BATTLE' | 'RACE' | 'MEMORY' | 'SKILL'
-  difficulty: 'EASY' | 'MEDIUM' | 'HARD'
-  maxAttempts: number
-  rewardGold: number
-  rewardExperience: number
-}
+// ==================== TP SYSTEM ====================
 
-export interface MinigameResult {
-  id: string
+export interface TPSummary {
   characterId: string
-  minigameId: string
-  score: number
-  won: boolean
-  goldEarned: number
-  experienceEarned: number
-  completedAt: string
+  totalTP: number
+  spentTP: number
+  availableTP: number
+  lastAwardedAt?: string
+  transactionCount: number
 }
 
-// Skill
-export interface Skill {
-  id: string
-  name: string
-  description: string
-  class: CharacterClass
-  cooldown: number
-  manaCost: number
-  damage?: number
-  healing?: number
+export interface TPTransaction {
+  id: string // UUID
+  character: Character
+  amount: number
+  type: 'AWARD' | 'SPEND'
+  reason: string
+  createdAt: string
+  createdBy?: string
 }
 
-export interface CharacterSkill {
-  id: string
-  characterId: string
-  skillId: string
+export interface AllocateAttributeRequest {
+  characterId: string // UUID
+  attributeName: AttributeName
+  points: number // 1-50
+}
+
+export interface AwardTPRequest {
+  characterId: string // UUID
+  amount: number
+  reason: string
+}
+
+// ==================== EXPERIENCE ====================
+
+export interface LevelProgress {
+  currentLevel: number
+  currentExp: number
+  expForNextLevel: number
+  progressPercentage: number
+  isMaxLevel: boolean
+}
+
+export interface ExperienceInfo {
   level: number
-  lastUsedAt?: string
+  currentExp: number
+  expForNextLevel: number
+  progressPercentage: number
+  totalExp: number
+  isMaxLevel: boolean
+  nextLevelIn: number
+}
+
+export interface ExperienceTable {
+  level: number
+  expRequired: number
+  totalExp: number
+}
+
+export interface GainExpRequest {
+  amount: number
+  reason: string
+}
+
+// ==================== USER ====================
+
+export interface User {
+  id: string // UUID
+  email: string
+  name: string
+  role: 'ROLE_PLAYER' | 'ROLE_MASTER'
+  createdAt: string
+  updatedAt: string
 }
