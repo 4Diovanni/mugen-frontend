@@ -8,7 +8,7 @@ import { useAuth } from '@hooks/useAuth'
 export default function Register() {
   const { register, isLoading, error, clearError } = useAuth()
   const [formData, setFormData] = useState({
-    name: '',
+    displayName: '',
     email: '',
     password: '',
     confirmPassword: '',
@@ -23,7 +23,7 @@ export default function Register() {
     e.preventDefault()
     clearError()
 
-    if (!formData.name || !formData.email || !formData.password || !formData.confirmPassword) {
+    if (!formData.displayName || !formData.email || !formData.password || !formData.confirmPassword) {
       return
     }
 
@@ -31,7 +31,7 @@ export default function Register() {
       return
     }
 
-    await register(formData.email, formData.password, formData.name, formData.confirmPassword)
+    await register(formData.email, formData.password, formData.displayName, formData.confirmPassword)
   }
 
   return (
@@ -61,8 +61,8 @@ export default function Register() {
               </label>
               <input
                 type="text"
-                name="name"
-                value={formData.name}
+                name="displayName"
+                value={formData.displayName}
                 onChange={handleChange}
                 placeholder="Seu Nome"
                 className="w-full px-4 py-2 bg-charcoal-800 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-teal-500 transition"
