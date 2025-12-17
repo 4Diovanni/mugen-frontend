@@ -10,7 +10,7 @@ export interface LoginRequest {
 export interface RegisterRequest {
   email: string
   password: string
-  name: string
+  displayName: string  // ✅ Changed from 'name' to 'displayName'
   confirmPassword: string
 }
 
