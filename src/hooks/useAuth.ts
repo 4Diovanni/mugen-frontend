@@ -185,7 +185,7 @@ export function useAuth() {
     async (
       email: string,
       password: string,
-      name: string,
+      displayName: string,
       confirmPassword: string
     ) => {
       try {
@@ -196,7 +196,7 @@ export function useAuth() {
         const response = await authApi.register({
           email,
           password,
-          name,
+          displayName,  // ✅ Changed from 'name' to 'displayName'
           confirmPassword,
         })
         console.log('✅ Registration response:', response)
