@@ -3,6 +3,7 @@ import { useAuthStore } from '@stores/authStore'
 import * as authApi from '@api/endpoints/auth.api'
 import { useNavigate } from 'react-router-dom'
 import toast from 'react-hot-toast'
+import { jwtDecode } from 'jwt-decode'
 
 /**
  * useAuth Hook
@@ -26,34 +27,77 @@ export function useAuth() {
   } = useAuthStore()
 
   /**
+   * Extract user data from JWT token
+   */
+  const extractUserFromToken = (jwtToken: string) => {
+    try {
+      const decoded: any = jwtDecode(jwtToken)
+      console.log('🔓 Decoded JWT:', decoded)
+
+      // Extract user data from JWT payload
+      const userData = {
+        id: decoded.sub || decoded.userId || 'unknown',
+        email: decoded.email || 'unknown',
+        name: decoded.name || 'User',
+        role: decoded.roles?.[0] || decoded.role || 'ROLE_PLAYER',
+      }
+
+      console.log('👤 Extracted user from token:', userData)
+      return userData
+    } catch (err) {
+      console.error('❌ Failed to decode JWT:', err)
+      throw new Error('Não foi possível decodificar o token')
+    }
+  }
+
+  /**
    * Parse login response - handles multiple response formats
    */
   const parseLoginResponse = (response: any) => {
     console.log('🔍 Login Response:', response)
 
-    // Try different ways backend might return the data
     let userData = null
     let newToken = null
 
-    // Format 1: { user: {...}, token: "..." }
-    if (response?.user && response?.token) {
+    // Format 1: OAuth2/JWT Response { access_token, expires_in, token_type }
+    if (response?.access_token && !response?.user) {
+      console.log('🔑 OAuth2/JWT format detected')
+      newToken = response.access_token
+      userData = extractUserFromToken(newToken)
+    }
+    // Format 2: { user: {...}, token: "..." }
+    else if (response?.user && response?.token) {
+      console.log('📦 Format 2: Direct user + token')
       userData = response.user
       newToken = response.token
     }
-    // Format 2: { data: { user: {...}, token: "..." } }
+    // Format 3: { data: { user: {...}, token: "..." } }
     else if (response?.data?.user && response?.data?.token) {
+      console.log('📦 Format 3: Wrapped in data')
       userData = response.data.user
       newToken = response.data.token
     }
-    // Format 3: { userData: {...}, token: "..." }
+    // Format 4: { userData: {...}, token: "..." }
     else if (response?.userData && response?.token) {
+      console.log('📦 Format 4: userData + token')
       userData = response.userData
       newToken = response.token
     }
-    // Format 4: Direct nested
+    // Format 5: Direct nested
     else if (response?.data?.user) {
+      console.log('📦 Format 5: Nested')
       userData = response.data.user
       newToken = response.data.token || response.token
+    }
+    // Format 6: Token response with user in JWT
+    else if (response?.token) {
+      console.log('📦 Format 6: Token response')
+      newToken = response.token
+      try {
+        userData = extractUserFromToken(newToken)
+      } catch (err) {
+        console.error('Cannot extract user from token:', err)
+      }
     }
 
     if (!userData || !newToken) {
@@ -68,9 +112,12 @@ export function useAuth() {
       )
     }
 
-    // Ensure user has role
+    // Ensure user has all required fields
     if (!userData.role) {
-      userData.role = response.data?.role || 'ROLE_PLAYER'
+      userData.role = 'ROLE_PLAYER'
+    }
+    if (!userData.id) {
+      userData.id = 'unknown'
     }
 
     return { userData, newToken }
@@ -155,7 +202,7 @@ export function useAuth() {
         console.log('✅ Registration response:', response)
 
         // Opção 1: Backend retorna token (auto-login)
-        if (response?.token || response?.data?.token) {
+        if (response?.token || response?.access_token || response?.data?.token) {
           try {
             const { userData, newToken } = parseLoginResponse(response)
             setUser(userData as any)
