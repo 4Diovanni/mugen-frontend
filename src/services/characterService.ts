@@ -1,403 +1,264 @@
 /**
- * Character Service
- * Business logic layer for character operations
+ * services/characterService.ts
+ * Character API service - handles all character-related API calls
  */
 
-import {
-  characterEndpoints,
-  characterStatsEndpoints,
-  characterSkillsEndpoints,
-  characterTPEndpoints,
-  characterExpEndpoints,
-  characterTransformationEndpoints,
-} from '@/api/endpoints/characters';
-import {
+import type {
   Character,
-  CharacterDetail,
-  CharacterStats,
-  TPSummary,
-  CreateCharacterRequest,
-  UpdateCharacterRequest,
-  CharacterSkill,
-  AllocateAttributeRequest,
-  GainExpRequest,
-} from '@/@types/character';
+  CharacterListItem,
+  CreateCharacterDTO,
+  UpdateCharacterDTO,
+  CharacterAttributes,
+  UpdateCharacterAttributesDTO,
+  ApiResponse,
+  PaginatedResponse,
+} from '@/@types';
 
-class CharacterService {
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
+
+/**
+ * Get axios instance with auth token
+ */
+function getHeaders() {
+  const token = localStorage.getItem('token');
+  return {
+    'Content-Type': 'application/json',
+    ...(token && { Authorization: `Bearer ${token}` }),
+  };
+}
+
+/**
+ * Character Service
+ */
+export const characterService = {
   /**
-   * Get all characters (paginated)
+   * Get all characters for the authenticated user
    */
-  async getAllCharacters(page = 0, size = 10, sortBy = 'name', sortDirection = 'ASC') {
+  async getAllCharacters(): Promise<CharacterListItem[]> {
     try {
-      const response = await characterEndpoints.getAll(page, size, sortBy, sortDirection);
-      return response.data;
+      const response = await fetch(`${API_BASE_URL}/characters`, {
+        method: 'GET',
+        headers: getHeaders(),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch characters: ${response.statusText}`);
+      }
+
+      const data: ApiResponse<CharacterListItem[]> = await response.json();
+      return data.data || [];
     } catch (error) {
-      console.error('❌ Error fetching characters:', error);
+      console.error('Error fetching characters:', error);
       throw error;
     }
-  }
+  },
 
   /**
-   * Get characters by owner/user
-   */
-  async getCharactersByOwner(ownerId: string, paginated = false) {
-    try {
-      const response = await characterEndpoints.getByOwner(ownerId, paginated);
-      return response.data;
-    } catch (error) {
-      console.error('❌ Error fetching user characters:', error);
-      throw error;
-    }
-  }
-
-  /**
-   * Get single character by ID
+   * Get character details by ID
    */
   async getCharacterById(id: string): Promise<Character> {
     try {
-      const response = await characterEndpoints.getById(id);
-      return response.data;
+      const response = await fetch(`${API_BASE_URL}/characters/${id}`, {
+        method: 'GET',
+        headers: getHeaders(),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch character: ${response.statusText}`);
+      }
+
+      const data: ApiResponse<Character> = await response.json();
+      if (!data.data) {
+        throw new Error('Character not found');
+      }
+      return data.data;
     } catch (error) {
-      console.error('❌ Error fetching character:', error);
+      console.error('Error fetching character:', error);
       throw error;
     }
-  }
+  },
 
   /**
-   * Get character with full details including stats, skills, etc
+   * Create a new character
    */
-  async getCharacterDetail(id: string): Promise<CharacterDetail> {
+  async createCharacter(dto: CreateCharacterDTO): Promise<Character> {
     try {
-      const response = await characterEndpoints.getDetail(id);
-      return response.data;
+      const response = await fetch(`${API_BASE_URL}/characters`, {
+        method: 'POST',
+        headers: getHeaders(),
+        body: JSON.stringify(dto),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to create character: ${response.statusText}`);
+      }
+
+      const data: ApiResponse<Character> = await response.json();
+      if (!data.data) {
+        throw new Error('Failed to create character');
+      }
+      return data.data;
     } catch (error) {
-      console.error('❌ Error fetching character details:', error);
+      console.error('Error creating character:', error);
       throw error;
     }
-  }
+  },
 
   /**
-   * Create new character
+   * Update character details
    */
-  async createCharacter(data: CreateCharacterRequest): Promise<Character> {
+  async updateCharacter(
+    id: string,
+    dto: UpdateCharacterDTO
+  ): Promise<Character> {
     try {
-      const response = await characterEndpoints.create(data);
-      console.log('✅ Character created:', response.data);
-      return response.data;
+      const response = await fetch(`${API_BASE_URL}/characters/${id}`, {
+        method: 'PUT',
+        headers: getHeaders(),
+        body: JSON.stringify(dto),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to update character: ${response.statusText}`);
+      }
+
+      const data: ApiResponse<Character> = await response.json();
+      if (!data.data) {
+        throw new Error('Failed to update character');
+      }
+      return data.data;
     } catch (error) {
-      console.error('❌ Error creating character:', error);
+      console.error('Error updating character:', error);
       throw error;
     }
-  }
+  },
 
   /**
-   * Update character
-   */
-  async updateCharacter(id: string, data: UpdateCharacterRequest): Promise<Character> {
-    try {
-      const response = await characterEndpoints.update(id, data);
-      console.log('✅ Character updated:', response.data);
-      return response.data;
-    } catch (error) {
-      console.error('❌ Error updating character:', error);
-      throw error;
-    }
-  }
-
-  /**
-   * Delete character
-   */
-  async deleteCharacter(id: string): Promise<void> {
-    try {
-      await characterEndpoints.delete(id);
-      console.log('✅ Character deleted');
-    } catch (error) {
-      console.error('❌ Error deleting character:', error);
-      throw error;
-    }
-  }
-
-  /**
-   * Deactivate character (soft delete)
-   */
-  async deactivateCharacter(id: string): Promise<Character> {
-    try {
-      const response = await characterEndpoints.deactivate(id);
-      console.log('✅ Character deactivated:', response.data);
-      return response.data;
-    } catch (error) {
-      console.error('❌ Error deactivating character:', error);
-      throw error;
-    }
-  }
-
-  /**
-   * Update character name
+   * Update only character name
    */
   async updateCharacterName(id: string, name: string): Promise<Character> {
     try {
-      const response = await characterEndpoints.updateName(id, name);
-      console.log('✅ Character name updated:', response.data);
-      return response.data;
-    } catch (error) {
-      console.error('❌ Error updating character name:', error);
-      throw error;
-    }
-  }
-}
+      const response = await fetch(`${API_BASE_URL}/characters/${id}/name`, {
+        method: 'PUT',
+        headers: getHeaders(),
+        body: JSON.stringify({ name }),
+      });
 
-/**
- * Character Stats Service
- */
-class CharacterStatsService {
-  /**
-   * Get calculated stats
-   */
-  async getStats(characterId: string): Promise<CharacterStats> {
-    try {
-      const response = await characterStatsEndpoints.getStats(characterId);
-      return response.data;
+      if (!response.ok) {
+        throw new Error(`Failed to update character name: ${response.statusText}`);
+      }
+
+      const data: ApiResponse<Character> = await response.json();
+      if (!data.data) {
+        throw new Error('Failed to update character name');
+      }
+      return data.data;
     } catch (error) {
-      console.error('❌ Error fetching stats:', error);
+      console.error('Error updating character name:', error);
       throw error;
     }
-  }
+  },
 
   /**
-   * Get TP summary
+   * Delete character by ID
    */
-  async getTPSummary(characterId: string): Promise<TPSummary> {
+  async deleteCharacter(id: string): Promise<void> {
     try {
-      const response = await characterStatsEndpoints.getTPSummary(characterId);
-      return response.data;
-    } catch (error) {
-      console.error('❌ Error fetching TP summary:', error);
-      throw error;
-    }
-  }
-}
+      const response = await fetch(`${API_BASE_URL}/characters/${id}`, {
+        method: 'DELETE',
+        headers: getHeaders(),
+      });
 
-/**
- * Character Skills Service
- */
-class CharacterSkillsService {
-  /**
-   * Get all character skills
-   */
-  async getSkills(characterId: string): Promise<CharacterSkill[]> {
-    try {
-      const response = await characterSkillsEndpoints.getAll(characterId);
-      return response.data;
+      if (!response.ok) {
+        throw new Error(`Failed to delete character: ${response.statusText}`);
+      }
     } catch (error) {
-      console.error('❌ Error fetching character skills:', error);
+      console.error('Error deleting character:', error);
       throw error;
     }
-  }
+  },
 
   /**
-   * Add skill to character
+   * Get count of active characters
    */
-  async addSkill(characterId: string, skillId: number): Promise<CharacterSkill> {
+  async getCharacterCount(): Promise<number> {
     try {
-      const response = await characterSkillsEndpoints.add(characterId, skillId);
-      console.log('✅ Skill added:', response.data);
-      return response.data;
+      const response = await fetch(`${API_BASE_URL}/characters/count`, {
+        method: 'GET',
+        headers: getHeaders(),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch character count: ${response.statusText}`);
+      }
+
+      const data: ApiResponse<{ count: number }> = await response.json();
+      return data.data?.count || 0;
     } catch (error) {
-      console.error('❌ Error adding skill:', error);
+      console.error('Error fetching character count:', error);
       throw error;
     }
-  }
+  },
 
   /**
-   * Remove skill from character
+   * Get character attributes/stats
    */
-  async removeSkill(characterId: string, skillId: number): Promise<void> {
+  async getCharacterAttributes(
+    id: string
+  ): Promise<CharacterAttributes> {
     try {
-      await characterSkillsEndpoints.remove(characterId, skillId);
-      console.log('✅ Skill removed');
-    } catch (error) {
-      console.error('❌ Error removing skill:', error);
-      throw error;
-    }
-  }
-}
+      const response = await fetch(`${API_BASE_URL}/characters/${id}/attributes`, {
+        method: 'GET',
+        headers: getHeaders(),
+      });
 
-/**
- * Character TP Service
- */
-class CharacterTPService {
-  /**
-   * Allocate TP to attribute
-   */
-  async allocateAttribute(
-    characterId: string,
-    data: AllocateAttributeRequest
-  ): Promise<Character> {
-    try {
-      const response = await characterTPEndpoints.allocateAttribute(characterId, data);
-      console.log('✅ TP allocated:', response.data);
-      return response.data;
+      if (!response.ok) {
+        throw new Error(
+          `Failed to fetch character attributes: ${response.statusText}`
+        );
+      }
+
+      const data: ApiResponse<CharacterAttributes> = await response.json();
+      if (!data.data) {
+        throw new Error('Character attributes not found');
+      }
+      return data.data;
     } catch (error) {
-      console.error('❌ Error allocating TP:', error);
+      console.error('Error fetching character attributes:', error);
       throw error;
     }
-  }
+  },
 
   /**
-   * Calculate TP cost
+   * Update character attributes/stats
    */
-  async calculateTPCost(
-    characterId: string,
-    attributeName: string,
-    points: number
-  ): Promise<number> {
+  async updateCharacterAttributes(
+    id: string,
+    dto: UpdateCharacterAttributesDTO
+  ): Promise<CharacterAttributes> {
     try {
-      const response = await characterTPEndpoints.calculateCost(
-        characterId,
-        attributeName,
-        points
-      );
-      return response.data;
+      const response = await fetch(`${API_BASE_URL}/characters/${id}/attributes`, {
+        method: 'PUT',
+        headers: getHeaders(),
+        body: JSON.stringify(dto),
+      });
+
+      if (!response.ok) {
+        throw new Error(
+          `Failed to update character attributes: ${response.statusText}`
+        );
+      }
+
+      const data: ApiResponse<CharacterAttributes> = await response.json();
+      if (!data.data) {
+        throw new Error('Failed to update character attributes');
+      }
+      return data.data;
     } catch (error) {
-      console.error('❌ Error calculating TP cost:', error);
+      console.error('Error updating character attributes:', error);
       throw error;
     }
-  }
-
-  /**
-   * Get TP transaction history
-   */
-  async getTPHistory(characterId: string): Promise<any[]> {
-    try {
-      const response = await characterTPEndpoints.getHistory(characterId);
-      return response.data;
-    } catch (error) {
-      console.error('❌ Error fetching TP history:', error);
-      throw error;
-    }
-  }
-}
-
-/**
- * Character Experience Service
- */
-class CharacterExpService {
-  /**
-   * Gain experience
-   */
-  async gainExp(characterId: string, data: GainExpRequest): Promise<Character> {
-    try {
-      const response = await characterExpEndpoints.gainExp(characterId, data);
-      console.log('✅ Experience gained:', response.data);
-      return response.data;
-    } catch (error) {
-      console.error('❌ Error gaining experience:', error);
-      throw error;
-    }
-  }
-
-  /**
-   * Get level progress
-   */
-  async getLevelProgress(characterId: string) {
-    try {
-      const response = await characterExpEndpoints.getLevelProgress(characterId);
-      return response.data;
-    } catch (error) {
-      console.error('❌ Error fetching level progress:', error);
-      throw error;
-    }
-  }
-
-  /**
-   * Get experience info
-   */
-  async getExpInfo(characterId: string) {
-    try {
-      const response = await characterExpEndpoints.getExpInfo(characterId);
-      return response.data;
-    } catch (error) {
-      console.error('❌ Error fetching exp info:', error);
-      throw error;
-    }
-  }
-}
-
-/**
- * Character Transformation Service
- */
-class CharacterTransformationService {
-  /**
-   * Get available transformations
-   */
-  async getAvailableTransformations(characterId: string) {
-    try {
-      const response = await characterTransformationEndpoints.getAvailable(characterId);
-      return response.data;
-    } catch (error) {
-      console.error('❌ Error fetching available transformations:', error);
-      throw error;
-    }
-  }
-
-  /**
-   * Get all transformations
-   */
-  async getAllTransformations(characterId: string) {
-    try {
-      const response = await characterTransformationEndpoints.getAll(characterId);
-      return response.data;
-    } catch (error) {
-      console.error('❌ Error fetching transformations:', error);
-      throw error;
-    }
-  }
-
-  /**
-   * Get unlocked transformations
-   */
-  async getUnlockedTransformations(characterId: string) {
-    try {
-      const response = await characterTransformationEndpoints.getUnlocked(characterId);
-      return response.data;
-    } catch (error) {
-      console.error('❌ Error fetching unlocked transformations:', error);
-      throw error;
-    }
-  }
-
-  /**
-   * Unlock transformation
-   */
-  async unlockTransformation(characterId: string, transformationId: number) {
-    try {
-      const response = await characterTransformationEndpoints.unlock(
-        characterId,
-        transformationId
-      );
-      console.log('✅ Transformation unlocked:', response.data);
-      return response.data;
-    } catch (error) {
-      console.error('❌ Error unlocking transformation:', error);
-      throw error;
-    }
-  }
-}
-
-// Export service instances
-export const characterService = new CharacterService();
-export const characterStatsService = new CharacterStatsService();
-export const characterSkillsService = new CharacterSkillsService();
-export const characterTPService = new CharacterTPService();
-export const characterExpService = new CharacterExpService();
-export const characterTransformationService = new CharacterTransformationService();
-
-// Export types
-export type {
-  Character,
-  CharacterDetail,
-  CharacterStats,
-  TPSummary,
-  CreateCharacterRequest,
-  UpdateCharacterRequest,
+  },
 };
+
+export default characterService;
