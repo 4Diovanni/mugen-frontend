@@ -4,8 +4,8 @@
  */
 
 import apiClient from '../client'
-import type { ApiResponse } from '@types/index'
-import type { Skill } from '@types/game.types'
+import type { ApiResponse } from '@/@types'
+import type { Skill } from '@/@types/game.types'
 
 const BASE_PATH = '/skills'
 

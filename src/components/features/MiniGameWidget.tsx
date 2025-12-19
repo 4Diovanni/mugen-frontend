@@ -1,4 +1,4 @@
-import { Minigame } from '@types/game.types'
+import { Minigame } from '@/@types/game.types'
 import Card from '@components/common/Card'
 import Button from '@components/common/Button'
 

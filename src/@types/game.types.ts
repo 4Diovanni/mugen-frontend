@@ -233,7 +233,7 @@ export interface User {
   id: string // UUID
   email: string
   name: string
-  role: 'ROLE_PLAYER' | 'ROLE_MASTER'
+  role: 'ROLE_PLAYER' | 'ROLE_MASTER' | 'ROLE_ADMIN'
   createdAt: string
   updatedAt: string
 }

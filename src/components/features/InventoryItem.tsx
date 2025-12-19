@@ -1,4 +1,4 @@
-import { Item } from '@types/game.types'
+import { Item } from '@/@types/game.types'
 import Card from '@components/common/Card'
 
 interface InventoryItemProps {

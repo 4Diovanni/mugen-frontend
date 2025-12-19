@@ -19,7 +19,7 @@ export interface LoginResponse {
     id: string
     email: string
     name: string
-    role: 'ROLE_PLAYER' | 'ROLE_MASTER'
+    role: 'ROLE_PLAYER' | 'ROLE_MASTER' | 'ROLE_ADMIN'
   }
   token: string
   refreshToken?: string

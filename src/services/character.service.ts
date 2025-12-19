@@ -6,7 +6,7 @@
 import * as charactersApi from '@api/endpoints/characters.api'
 import * as inventoryApi from '@api/endpoints/inventory.api'
 import { useCharacterStore } from '@stores/characterStore'
-import type { CreateCharacterRequest, Character, AllocateAttributeRequest } from '@types/game.types'
+import type { CreateCharacterRequest, AllocateAttributeRequest } from '@/@types/game.types.ts'
 
 export class CharacterService {
   /**

@@ -3,8 +3,8 @@
  */
 
 import apiClient from '../client'
-import type { ApiResponse } from '@types/index'
-import type { Achievement } from '@types/game.types'
+import type { ApiResponse } from '@/@types'
+import type { Achievement } from '@/@types/game.types'
 
 /**
  * GET /achievements

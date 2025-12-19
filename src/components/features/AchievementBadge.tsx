@@ -1,4 +1,4 @@
-import { Achievement } from '@types/game.types'
+import { Achievement } from '@/@types/game.types'
 import Card from '@components/common/Card'
 
 interface AchievementBadgeProps {

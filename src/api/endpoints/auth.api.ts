@@ -3,8 +3,8 @@
  */
 
 import apiClient from '../client'
-import type { LoginRequest, LoginResponse, RegisterRequest } from '@types/auth.types'
-import type { ApiResponse } from '@types/index'
+import type { LoginRequest, LoginResponse, RegisterRequest } from '@/@types/auth.types'
+import type { ApiResponse } from '@/@types'
 
 /**
  * POST /auth/login

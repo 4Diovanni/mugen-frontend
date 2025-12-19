@@ -3,7 +3,7 @@
  * Central hub for all TypeScript types used across the application
  */
 
-export type UserRole = 'ROLE_PLAYER' | 'ROLE_MASTER'
+export type UserRole = 'ROLE_PLAYER' | 'ROLE_MASTER' | 'ROLE_ADMIN'
 
 export interface User {
   id: string

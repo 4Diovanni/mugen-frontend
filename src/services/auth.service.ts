@@ -5,7 +5,7 @@
 
 import * as authApi from '@api/endpoints/auth.api'
 import { useAuthStore } from '@stores/authStore'
-import type { LoginRequest, RegisterRequest } from '@types/auth.types'
+import type { LoginRequest, RegisterRequest } from '@/@types/auth.types'
 
 export class AuthService {
   /**

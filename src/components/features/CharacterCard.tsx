@@ -1,4 +1,4 @@
-import { Character } from '@types/game.types'
+import { Character } from '@/@types/game.types'
 import Card from '@components/common/Card'
 import { Link } from 'react-router-dom'
 
@@ -28,12 +28,12 @@ function CharacterCard({ character }: CharacterCardProps) {
             <div>
               <p className="text-gray-500 dark:text-gray-400">Experiência</p>
               <p className="font-semibold text-gray-900 dark:text-white">
-                {character.experience}
+                {character.exp}
               </p>
             </div>
             <div>
               <p className="text-gray-500 dark:text-gray-400">Ouro</p>
-              <p className="font-semibold text-yellow-600">💰 {character.gold}</p>
+              <p className="font-semibold text-yellow-600">💰 {character.level}</p>
             </div>
           </div>
 

@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import type { Character } from '@types/game.types'
+import type { Character } from '@/@types/game.types'
 
 /**
  * Character Store

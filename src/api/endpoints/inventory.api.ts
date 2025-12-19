@@ -4,8 +4,8 @@
  */
 
 import apiClient from '../client'
-import type { ApiResponse } from '@types/index'
-import type { InventoryItem } from '@types/game.types'
+import type { ApiResponse } from '@/@types'
+import type { InventoryItem } from '@/@types/game.types.ts'
 
 const BASE_PATH = '/inventory'
 

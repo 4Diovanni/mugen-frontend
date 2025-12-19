@@ -4,7 +4,7 @@
  */
 
 import apiClient from '../client'
-import type { ApiResponse } from '@types/index'
+import type { ApiResponse } from '@/@types'
 import type {
   Character,
   CreateCharacterRequest,
@@ -13,7 +13,6 @@ import type {
   CharacterStats,
   CharacterSkill,
   CharacterTransformation,
-  InventoryItem,
   TPSummary,
   TPTransaction,
   LevelProgress,
@@ -22,10 +21,8 @@ import type {
   AllocateAttributeRequest,
   AwardTPRequest,
   GainExpRequest,
-  Skill,
   Transformation,
-  CharacterAchievement,
-} from '@types/game.types'
+} from '@/@types/game.types'
 
 const BASE_PATH = '/characters'
 
